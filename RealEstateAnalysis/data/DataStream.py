@@ -26,3 +26,4 @@ class DataStream(DataSource):
         a = requests.get(self.url, self.params)
         self.data = a.json()
         super().load()
+        return self

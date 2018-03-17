@@ -42,7 +42,7 @@ class DataJson(DataSource):
             if self.__dataPath is not None:
                 for path in self.__dataPath:
                     data = data[path]
-            self.data = [ self.processor(row) 
+            self.data = [ self.selector(self.processor(row) )
                           for row in data
                           if self.test(row)
                         ]

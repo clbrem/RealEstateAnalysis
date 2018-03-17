@@ -1,5 +1,6 @@
 from unittest import TestCase, skip
 import RealEstateAnalysis
+import warnings
 from RealEstateAnalysis.Data import DataStream, DataCsv
 class RealEstateAnalysisTest(TestCase):
 	def setUp(self):
@@ -14,7 +15,7 @@ class RealEstateAnalysisTest(TestCase):
 
 class DataCsvTest(TestCase):
 	def setUp(self):
-		self.csv = DataCsv.new("/Users/cbremer/Projects/TensorFlow/RealEstateAnalysis/RealEstateAnalysis/EBR_Building_Permits.csv", "latin-1")
+		self.csv = DataCsv.new("RealEstateAnalysis/SampleData/EBR_Building_Permits.csv", "latin-1")
 		self.csv.load()
 
 	def tearDown(self):
@@ -58,6 +59,24 @@ class DataCsvTest(TestCase):
 		sample = self.csv.sample(10)
 		output = sample.export(['geolocation', 'project_value'])
 		self.assertEqual(len(output),10)
+		
+	def test_deprecated(self):
+		with warnings.catch_warnings(record=True) as w:
+			warnings.simplefilter("always")
+			self.csv.reset()
+			self.csv.process(geolocation = self.parseGeo)
+			self.assertGreaterEqual(len(w), 1)
+			self.assertTrue(issubclass(w[-1].category, DeprecationWarning ))
+		warnings.simplefilter("default")
+
+	def test_can_select(self):
+		self.csv.reset()
+		self.csv.select(geolocation = lambda x: self.parseGeo(x['geolocation']), project_value=lambda x: float(x['project_value'].replace('$','')))
+		self.csv.load()
+		first = self.csv[0]
+		self.assertIn('geolocation', first)
+		self.assertIn('project_value', first)
+		self.assertEqual(len(first['geolocation']), 2)
 		
 	
 

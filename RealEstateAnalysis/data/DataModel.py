@@ -2,6 +2,7 @@ import abc
 import random
 import pandas
 from collections import defaultdict
+from RealEstateAnalysis.Notifications.Deprecation import deprecated
 
 class DataSource(abc.ABC):
 
@@ -9,10 +10,10 @@ class DataSource(abc.ABC):
         self.__data = []
         self.__len = 0
         self.__postProcess = None
+        self.__select = None
         self.__params = None
         self.__loaded = False
         self.__test = None
-
     #data
     @property
     def data(self):
@@ -21,6 +22,15 @@ class DataSource(abc.ABC):
     @data.setter
     def data(self, x):
         self.__data = x
+    
+    def select(self, keys=[], **kwargs):
+        if self.__select == None:
+            self.__select = {}
+        for arg in keys:
+            self.__select[arg] = lambda x : x[arg]
+        for arg in kwargs:
+            self.__select[arg] = kwargs[arg]
+        return self
 
     @abc.abstractmethod
     def __iter__(self):
@@ -103,8 +113,9 @@ class DataSource(abc.ABC):
             for test in self.__test:
                 if not test(input):
                     return False
-        return True     
+        return True
 
+    @deprecated("processor", "1.1")
     def processor(self, input):
         if self.__postProcess is None:
             return input
@@ -112,7 +123,17 @@ class DataSource(abc.ABC):
             for key in set(self.__postProcess).intersection(input):
                 input[key] = self.__postProcess[key](input[key])
             return input
+    
+    def selector(self, input):
+        if self.__select is None:
+            return input
+        else:
+            output = {}
+            for key in self.__select:
+                output[key] = self.__select[key](input)
+            return output
 
+    @deprecated("process", "1.1")
     def process(self, **kwargs):
         if self.__postProcess is None:
             self.__postProcess = defaultdict(lambda x: x)
@@ -154,7 +175,7 @@ class DataArray(DataSource):
         return DataSource.__iter__(self)
 
     def load(self):
-        self.__data = [ self.processor(x) 
+        self.__data = [ self.selector(self.processor(x)) 
                         for x in self.__original 
                         if self.test(x)
                       ]

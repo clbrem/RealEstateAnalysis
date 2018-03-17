@@ -43,7 +43,7 @@ class DataCsv(DataSource):
                       ]
             csvreader = csv.DictReader(csvfile, headers)
             self.data = [
-                self.processor(row) for row in csvreader
+                self.selector(self.processor(row)) for row in csvreader
                     if self.test(row)
             ]
         super().load()
