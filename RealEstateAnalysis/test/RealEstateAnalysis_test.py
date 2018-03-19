@@ -42,15 +42,8 @@ class DataCsvTest(TestCase):
 		self.assertEqual(len(sample), 10)
 		self.assertEqual(len(self.csv), N-10)
 
-	def test_canProcess(self):
-		self.csv.reset()
-		
-		self.csv.process(geolocation = self.parseGeo)
-		self.csv.load()
-		sample = self.csv.sample(1)[0]
-		a, b = sample["geolocation"]
-		self.assertGreater(float(a), 0)
-		self.assertGreater(0, float(b))
+
+
 
 	def test_canExport(self):
 		self.csv.reset()

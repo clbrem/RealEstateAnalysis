@@ -23,11 +23,14 @@ class DataSource(abc.ABC):
     def data(self, x):
         self.__data = x
     
+    def selectKey(self, key):
+        return lambda x: x[key]
+
     def select(self, keys=[], **kwargs):
         if self.__select == None:
             self.__select = {}
         for arg in keys:
-            self.__select[arg] = lambda x : x[arg]
+            self.__select[arg] = self.selectKey(arg)
         for arg in kwargs:
             self.__select[arg] = kwargs[arg]
         return self
@@ -155,7 +158,7 @@ class DataSource(abc.ABC):
         return DataArray(output)
 
     def dataFrame(self):
-        return pandas.DataFrame(self.data)        
+        return pandas.DataFrame(self.data)
 
 def new(dataArray):
     return DataArray(dataArray)
