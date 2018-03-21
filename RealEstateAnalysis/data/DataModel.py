@@ -107,14 +107,17 @@ class DataSource(abc.ABC):
             self.__params[key] = kwargs[key]
         return self
 
-    def test(self, input):
-        if self.__params is not None:
-            for key in set(self.__params).intersection(input):
-                if (self.__params[key] != input[key]):
-                    return False
+    def test(self, input):        
         if self.__test is not None:
             for test in self.__test:
                 if not test(input):
+                    return False
+        return self.__testParams(input)
+    
+    def __testParams(self, input):
+        if self.__params is not None:
+            for key in set(self.__params).intersection(input):
+                if (self.__params[key] != input[key]):
                     return False
         return True
 
@@ -149,6 +152,7 @@ class DataSource(abc.ABC):
     def reset(self):
         self.__postProcess = None
         self.__params = None
+        self.__test = None
         self.__len = len(self.__data)
         self.__loaded = False
         return self

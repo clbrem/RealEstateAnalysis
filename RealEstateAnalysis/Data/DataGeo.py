@@ -16,12 +16,13 @@ class DataGeo(DataSource):
         super().__iter__()
 
     def __init__(self, file, encoding=None):
-        DataSource.__init__(self)
+        super().__init__()
         self.__file = file
         self.__encoding = encoding
         fileDir = os.path.dirname(os.path.realpath('__file__'))        
         self.__filePath = os.path.join(fileDir, file)
         self.__geoType = None
+
 
     @property
     def geoType(self):
@@ -143,3 +144,11 @@ class DataGeo(DataSource):
 
     def selectKey(self, key):
         return lambda x: x["properties"][key]
+
+    def __testParams(self, input):
+        if self.params is not None:
+            for key in set(self.params).intersection(input["properties"]):
+                if (self.params[key] != input["properties"][key]):
+                    return False
+        return True
+       
